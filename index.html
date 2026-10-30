@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Pangkat - Belajar Perpangkatan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Desain 3D & Pixar Vibe */
+        :root {
+            --primary: #4f46e5;
+            --primary-shadow: #3730a3;
+            --secondary: #ec4899;
+            --secondary-shadow: #be185d;
+            --success: #10b981;
+            --success-shadow: #047857;
+            --warning: #f59e0b;
+            --warning-shadow: #b45309;
+            --info: #0ea5e9;
+            --info-shadow: #0369a1;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); /* Tema Luar Angkasa */
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Fredoka One', cursive;
+            letter-spacing: 1px;
+        }
+
+        /* 3D Button Styles */
+        .btn-3d {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            font-family: 'Fredoka One', cursive;
+            border-radius: 16px;
+            text-transform: uppercase;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .btn-3d:active {
+            transform: translateY(6px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            box-shadow: 0 6px 0 var(--primary-shadow), 0 10px 15px rgba(0,0,0,0.3);
+        }
+        .btn-primary:active { box-shadow: 0 0px 0 var(--primary-shadow); }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            box-shadow: 0 6px 0 var(--secondary-shadow), 0 10px 15px rgba(0,0,0,0.3);
+        }
+        .btn-secondary:active { box-shadow: 0 0px 0 var(--secondary-shadow); }
+
+        .btn-success {
+            background-color: var(--success);
+            box-shadow: 0 6px 0 var(--success-shadow), 0 10px 15px rgba(0,0,0,0.3);
+        }
+        .btn-success:active { box-shadow: 0 0px 0 var(--success-shadow); }
+
+        .btn-warning {
+            background-color: var(--warning);
+            box-shadow: 0 6px 0 var(--warning-shadow), 0 10px 15px rgba(0,0,0,0.3);
+        }
+        .btn-warning:active { box-shadow: 0 0px 0 var(--warning-shadow); }
+
+        /* Card Styles */
+        .card-3d {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1f2937;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2), inset 0 -4px 0 rgba(0,0,0,0.1);
+            border: 4px solid #fff;
+        }
+
+        /* Nav Menu */
+        .nav-item {
+            transition: all 0.3s;
+        }
+        .nav-item:hover {
+            transform: scale(1.1) translateY(-5px);
+        }
+
+        /* Page Transitions */
+        .page {
+            display: none;
+            animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+        .page.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            0% { transform: translateY(50px) scale(0.9); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* Floating Animation */
+        .float-anim {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Game 2: Memory Card */
+        .memory-card {
+            aspect-ratio: 1;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .memory-card-inner {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .memory-card.flipped .memory-card-inner {
+            transform: rotateY(180deg);
+        }
+        .memory-card-front, .memory-card-back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            font-size: 1.5rem;
+            font-family: 'Fredoka One', cursive;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .memory-card-front {
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+            color: white;
+            font-size: 3rem;
+        }
+        .memory-card-back {
+            background: white;
+            color: #1e40af;
+            transform: rotateY(180deg);
+            border: 4px solid #f59e0b;
+        }
+
+        /* Custom Modal */
+        #custom-modal {
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+        #custom-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-20 md:pb-0 md:pl-24">
+
+    <!-- Tombol Musik BGM (Floating) -->
+    <button id="music-btn" onclick="SoundManager.toggleBGM()" class="fixed top-4 right-4 z-[100] bg-white w-12 h-12 rounded-full shadow-lg border-4 border-gray-200 hover:scale-110 transition-transform flex items-center justify-center">
+        <i id="music-icon" class="fas fa-volume-mute text-red-500 text-xl"></i>
+    </button>
+
+    <!-- Sidebar Navigation (Desktop) / Bottom Nav (Mobile) -->
+    <nav class="fixed bottom-0 w-full md:w-24 md:h-screen md:left-0 bg-white/10 backdrop-blur-md border-t md:border-t-0 md:border-r border-white/20 z-50 flex md:flex-col justify-around md:justify-center items-center p-2 md:py-8 gap-1 md:gap-6 shadow-2xl">
+        <div class="nav-item cursor-pointer text-center" onclick="navigate('home')">
+            <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl mx-auto shadow-[0_4px_0_#1e3a8a] mb-1"><i class="fas fa-home"></i></div>
+            <span class="text-xs font-bold hidden md:block">Home</span>
+        </div>
+        <div class="nav-item cursor-pointer text-center" onclick="navigate('panduan')">
+            <div class="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center text-xl mx-auto shadow-[0_4px_0_#064e3b] mb-1"><i class="fas fa-book-open"></i></div>
+            <span class="text-xs font-bold hidden md:block">Panduan</span>
+        </div>
+        <div class="nav-item cursor-pointer text-center" onclick="navigate('materi')">
+            <div class="w-12 h-12 rounded-full bg-yellow-500 text-white flex items-center justify-center text-xl mx-auto shadow-[0_4px_0_#78350f] mb-1"><i class="fas fa-graduation-cap"></i></div>
+            <span class="text-xs font-bold hidden md:block">Materi</span>
+        </div>
+        <div class="nav-item cursor-pointer text-center" onclick="navigate('gim')">
+            <div class="w-12 h-12 rounded-full bg-pink-500 text-white flex items-center justify-center text-xl mx-auto shadow-[0_4px_0_#831843] mb-1"><i class="fas fa-gamepad"></i></div>
+            <span class="text-xs font-bold hidden md:block">Gim</span>
+        </div>
+        <div class="nav-item cursor-pointer text-center" onclick="navigate('kuis')">
+            <div class="w-12 h-12 rounded-full bg-purple-500 text-white flex items-center justify-center text-xl mx-auto shadow-[0_4px_0_#4c1d95] mb-1"><i class="fas fa-pencil-alt"></i></div>
+            <span class="text-xs font-bold hidden md:block">Kuis</span>
+        </div>
+        <div class="nav-item cursor-pointer text-center" onclick="navigate('profil')">
+            <div class="w-12 h-12 rounded-full bg-cyan-500 text-white flex items-center justify-center text-xl mx-auto shadow-[0_4px_0_#164e63] mb-1"><i class="fas fa-user-astronaut"></i></div>
+            <span class="text-xs font-bold hidden md:block">Profil</span>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full max-w-5xl mx-auto p-4 pt-8 md:p-8">
+        
+        <!-- PAGE 1: HOME -->
+        <section id="home" class="page active flex flex-col items-center justify-center min-h-[80vh] text-center">
+            <div class="text-6xl md:text-8xl mb-6 float-anim">🚀✨</div>
+            <h1 class="text-4xl md:text-6xl text-yellow-300 font-display mb-4 drop-shadow-lg">Petualangan Pangkat!</h1>
+            <p class="text-lg md:text-2xl mb-8 max-w-2xl text-blue-100 font-semibold">Mari jelajahi luar angkasa dan temukan rahasia kekuatan bilangan bulat bersama kami!</p>
+            <div class="btn-3d btn-primary text-xl md:text-2xl" onclick="navigate('panduan')">
+                <i class="fas fa-rocket mr-3"></i> Mulai Petualangan
+            </div>
+            
+            <!-- Ornamen Dekorasi -->
+            <div class="absolute top-20 left-10 text-4xl opacity-50 float-anim" style="animation-delay: 1s">⭐</div>
+            <div class="absolute bottom-40 right-20 text-5xl opacity-50 float-anim" style="animation-delay: 2s">🪐</div>
+        </section>
+
+        <!-- PAGE 2: PANDUAN & TUJUAN -->
+        <section id="panduan" class="page">
+            <div class="card-3d p-6 md:p-10 mb-8">
+                <h1 class="text-3xl md:text-4xl text-blue-600 mb-6 text-center"><i class="fas fa-map-signs mr-2"></i> Panduan Penjelajah</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-2xl border-2 border-blue-200">
+                        <h2 class="text-2xl text-blue-800 mb-4"><i class="fas fa-route"></i> Cara Bermain</h2>
+                        <ul class="space-y-4 text-gray-700 font-semibold text-lg">
+                            <li class="flex items-start">
+                                <span class="w-8 h-8 rounded-full bg-yellow-400 text-white flex-shrink-0 flex items-center justify-center mr-3 mt-1 shadow-md">1</span> 
+                                <div><b class="text-blue-700">Materi:</b> Pelajari konsep dasar perpangkatan bilangan bulat.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="w-8 h-8 rounded-full bg-yellow-400 text-white flex-shrink-0 flex items-center justify-center mr-3 mt-1 shadow-md">2</span> 
+                                <div><b class="text-blue-700">Simulasi:</b> Gunakan mesin ajaib untuk melihat hasil perpangkatan secara langsung!</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="w-8 h-8 rounded-full bg-yellow-400 text-white flex-shrink-0 flex items-center justify-center mr-3 mt-1 shadow-md">3</span> 
+                                <div><b class="text-blue-700">Gim:</b> Pilih dan mainkan 3 gim seru untuk menguji ingatanmu.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="w-8 h-8 rounded-full bg-yellow-400 text-white flex-shrink-0 flex items-center justify-center mr-3 mt-1 shadow-md">4</span> 
+                                <div><b class="text-blue-700">Kuis:</b> Jawab 5 pertanyaan pilihan ganda untuk meraih skor sempurna!</div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-green-50 p-6 rounded-2xl border-2 border-green-200">
+                        <h2 class="text-2xl text-green-800 mb-4"><i class="fas fa-bullseye"></i> Tujuan Pembelajaran</h2>
+                        <div class="flex items-center justify-center h-32">
+                            <p class="text-xl text-center text-green-700 font-bold bg-white p-4 rounded-xl shadow-inner border border-green-100">
+                                "Murid dapat memahami perpangkatan bilangan bulat."
+                            </p>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <button class="btn-3d btn-success w-full" onclick="navigate('materi')">Ayo Belajar! <i class="fas fa-arrow-right ml-2"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 3: MATERI & SIMULASI -->
+        <section id="materi" class="page">
+            <h1 class="text-4xl text-yellow-300 text-center mb-8 drop-shadow-lg"><i class="fas fa-graduation-cap"></i> Markas Pengetahuan</h1>
+            
+            <div class="card-3d p-2 md:p-4 mb-6">
+                <!-- Tabs -->
+                <div class="flex flex-wrap border-b-2 border-gray-100 mb-4 bg-gray-50 rounded-t-xl">
+                    <button class="flex-1 py-3 font-display text-blue-600 border-b-4 border-blue-500 bg-blue-100 rounded-tl-xl tab-btn" onclick="openTab('tab1', this)">1. Pengertian</button>
+                    <button class="flex-1 py-3 font-display text-gray-500 border-b-4 border-transparent hover:bg-gray-100 tab-btn" onclick="openTab('tab2', this)">2. Bilangan Bulat</button>
+                    <button class="flex-1 py-3 font-display text-gray-500 border-b-4 border-transparent hover:bg-gray-100 tab-btn" onclick="openTab('tab3', this)">3. Dunia Nyata</button>
+                    <button class="flex-1 py-3 font-display text-gray-500 border-b-4 border-transparent hover:bg-gray-100 rounded-tr-xl tab-btn" onclick="openTab('tab4', this)">4. Simulasi</button>
+                </div>
+
+                <!-- Tab 1: Pengertian -->
+                <div id="tab1" class="tab-content p-4 md:p-6 animate-fadeIn">
+                    <h2 class="text-3xl text-blue-600 mb-4">Apa itu Perpangkatan?</h2>
+                    <p class="text-lg text-gray-700 mb-4">Perpangkatan merupakan bentuk sederhana dari bentuk <b>perkalian berulang</b> bilangan yang sama. Secara umum, dapat dituliskan sebagai:</p>
+                    
+                    <div class="bg-yellow-100 border-4 border-yellow-400 p-4 rounded-2xl text-center my-6">
+                        <span class="text-4xl font-display text-yellow-700">a<sup>n</sup> = a &times; a &times; ... &times; a</span><br>
+                        <span class="text-lg text-yellow-600 font-bold">(sebanyak n kali)</span>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-xl p-4 mt-6">
+                        <h3 class="text-xl text-blue-800 mb-2"><i class="fas fa-lightbulb text-yellow-500"></i> Contoh:</h3>
+                        <ul class="space-y-2 text-lg text-gray-700 font-semibold">
+                            <li><span class="inline-block w-8 text-blue-600">4<sup>2</sup></span> = 4 &times; 4 = <span class="text-green-600">16</span></li>
+                            <li><span class="inline-block w-8 text-blue-600">3<sup>4</sup></span> = 3 &times; 3 &times; 3 &times; 3 = <span class="text-green-600">81</span></li>
+                            <li><span class="inline-block w-8 text-blue-600">10<sup>2</sup></span> = 10 &times; 10 = <span class="text-green-600">100</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Bilangan Bulat Negatif -->
+                <div id="tab2" class="tab-content p-4 md:p-6 hidden">
+                    <h2 class="text-3xl text-blue-600 mb-4">Perpangkatan Bilangan Bulat</h2>
+                    <p class="text-lg text-gray-700 mb-4">Bagaimana jika bilangannya negatif? Mari kita lihat aturannya!</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                        <div class="bg-red-50 p-4 border-2 border-red-200 rounded-xl text-center shadow-md">
+                            <h3 class="text-xl text-red-700 mb-2 font-display">Pangkat Ganjil (1, 3, 5...)</h3>
+                            <p class="text-gray-700 font-bold mb-2">Hasilnya bernilai NEGATIF!</p>
+                            <div class="text-xl bg-white p-2 rounded border border-red-200 text-red-600">
+                                (-2)<sup>3</sup> = (-2) &times; (-2) &times; (-2) = <b>-8</b>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-4 border-2 border-green-200 rounded-xl text-center shadow-md">
+                            <h3 class="text-xl text-green-700 mb-2 font-display">Pangkat Genap (2, 4, 6...)</h3>
+                            <p class="text-gray-700 font-bold mb-2">Hasilnya bernilai POSITIF!</p>
+                            <div class="text-xl bg-white p-2 rounded border border-green-200 text-green-600">
+                                (-5)<sup>2</sup> = (-5) &times; (-5) = <b>25</b>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-4 border-l-4 border-purple-500 rounded-r-xl mt-4">
+                        <p class="text-gray-700 text-lg"><b>Awas Terkecoh!</b> <br>
+                        -(6<sup>2</sup>) itu <b>BEDA</b> dengan (-6)<sup>2</sup>.<br>
+                        -(6<sup>2</sup>) = -(6 &times; 6) = <b>-36</b>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Dunia Nyata -->
+                <div id="tab3" class="tab-content p-4 md:p-6 hidden">
+                    <h2 class="text-3xl text-blue-600 mb-4">Kehidupan Nyata di Luar Angkasa 🚀</h2>
+                    <div class="flex flex-col md:flex-row gap-6 items-center">
+                        <div class="flex-1">
+                            <p class="text-lg text-gray-700 mb-4">Tahukah kamu? Bintang terdekat dari Tata Surya kita adalah <b>Alpha Centauri</b>. Jaraknya sekitar 4,3 tahun cahaya dari Bumi!</p>
+                            <p class="text-lg text-gray-700 mb-4">1 tahun cahaya setara dengan:<br>
+                            <span class="text-2xl font-display text-blue-600">9.461.000.000.000.000 km</span></p>
+                            <p class="text-lg text-gray-700">Panjang sekali kan bilangannya? Dengan perpangkatan kita dapat menulisnya jadi lebih mudah:</p>
+                            <div class="bg-blue-100 p-4 rounded-xl mt-4 text-center border-2 border-blue-300">
+                                <span class="text-2xl font-display text-blue-800">9.461 &times; 10<sup>12</sup> km</span>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/3 flex justify-center text-8xl">
+                            🌎 ➡️ ✨
+                        </div>
+                    </div>
+                    <div class="mt-6 p-4 bg-gray-100 rounded-xl border border-gray-300">
+                        <p class="text-gray-600 italic font-semibold text-center">"Perpangkatan juga berguna untuk menghitung bakteri berkembang biak, bunga tabungan, dan pertumbuhan penduduk lho!"</p>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Simulasi -->
+                <div id="tab4" class="tab-content p-4 md:p-6 hidden">
+                    <h2 class="text-3xl text-info text-center mb-6"><i class="fas fa-cogs"></i> Mesin Simulasi Pangkat</h2>
+                    <div class="bg-gray-50 rounded-2xl p-6 border-2 border-gray-200">
+                        <div class="flex flex-col md:flex-row gap-6 items-center justify-center">
+                            <!-- Input Box -->
+                            <div class="flex items-end gap-2 text-3xl font-display text-gray-800">
+                                (
+                                <input type="number" id="sim-base" value="2" class="w-20 p-2 text-center rounded-xl border-4 border-blue-400 focus:outline-none focus:border-blue-600 shadow-inner bg-white">
+                                )<sup><input type="number" id="sim-exp" value="3" min="0" max="10" class="w-16 p-2 text-center rounded-xl border-4 border-pink-400 focus:outline-none focus:border-pink-600 shadow-inner bg-white text-xl -mt-6"></sup>
+                            </div>
+                            
+                            <div class="text-3xl text-gray-400">=</div>
+                            
+                            <!-- Visualizer -->
+                            <div class="flex-1 bg-white p-4 rounded-xl border-2 border-dashed border-gray-300 min-h-[80px] flex items-center justify-center text-center shadow-inner overflow-x-auto">
+                                <span id="sim-process" class="text-xl md:text-2xl text-gray-600 font-bold tracking-wider whitespace-nowrap">2 &times; 2 &times; 2</span>
+                            </div>
+                            
+                            <div class="text-3xl text-gray-400">=</div>
+                            
+                            <!-- Result -->
+                            <div class="w-32 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl shadow-[0_6px_0_#047857] flex items-center justify-center text-white text-4xl font-display transform transition hover:scale-105">
+                                <span id="sim-result">8</span>
+                            </div>
+                        </div>
+                        <p class="text-center text-gray-500 mt-6 font-semibold"><i class="fas fa-info-circle"></i> Ubah angka di dalam kotak untuk melihat keajaiban perpangkatan! (Maks pangkat: 10)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 4: GIM EDUKASI -->
+        <section id="gim" class="page">
+            <h1 class="text-4xl text-yellow-300 text-center mb-8 drop-shadow-lg"><i class="fas fa-gamepad"></i> Zona Bermain</h1>
+            
+            <!-- Menu Gim -->
+            <div id="gim-menu" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Gim 1 -->
+                <div class="card-3d p-6 text-center hover:scale-105 transition transform cursor-pointer border-4 border-blue-400" onclick="startGame(1)">
+                    <div class="text-6xl mb-4">⚖️</div>
+                    <h3 class="text-2xl text-blue-700 mb-2">Tebak Tanda</h3>
+                    <p class="text-gray-600 font-semibold mb-4">Ganjil atau Genap? Tentukan hasilnya Positif atau Negatif!</p>
+                    <button class="btn-3d btn-primary w-full">Mainkan</button>
+                </div>
+                <!-- Gim 2 -->
+                <div class="card-3d p-6 text-center hover:scale-105 transition transform cursor-pointer border-4 border-orange-400" onclick="startGame(2)">
+                    <div class="text-6xl mb-4">🃏</div>
+                    <h3 class="text-2xl text-orange-700 mb-2">Pasangan Kartu</h3>
+                    <p class="text-gray-600 font-semibold mb-4">Latih ingatanmu! Pasangkan bentuk pangkat dengan hasilnya.</p>
+                    <button class="btn-3d btn-warning w-full">Mainkan</button>
+                </div>
+                <!-- Gim 3 -->
+                <div class="card-3d p-6 text-center hover:scale-105 transition transform cursor-pointer border-4 border-pink-400" onclick="startGame(3)">
+                    <div class="text-6xl mb-4">🚀</div>
+                    <h3 class="text-2xl text-pink-700 mb-2">Misi Basis 10</h3>
+                    <p class="text-gray-600 font-semibold mb-4">Bantu roket ke Alpha Centauri dengan mengubah bilangan ke pangkat 10!</p>
+                    <button class="btn-3d btn-secondary w-full">Mainkan</button>
+                </div>
+            </div>
+
+            <!-- Area Gim 1: Tebak Tanda -->
+            <div id="game-1" class="hidden card-3d p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <button class="btn-3d btn-primary py-2 px-4" onclick="backToGameMenu()"><i class="fas fa-arrow-left"></i></button>
+                    <h2 class="text-2xl text-blue-700">Tebak Tanda</h2>
+                    <div class="text-xl font-display text-gray-600">Skor: <span id="g1-score">0</span>/5</div>
+                </div>
+                <div class="flex flex-col items-center py-8">
+                    <div class="bg-gray-100 border-4 border-dashed border-gray-300 rounded-3xl p-10 mb-8 w-full max-w-md text-center">
+                        <span id="g1-question" class="text-6xl font-display text-gray-800">(-3)<sup>4</sup></span>
+                    </div>
+                    <h3 class="text-xl text-gray-700 mb-4 font-bold">Apakah hasilnya Positif atau Negatif?</h3>
+                    <div class="flex gap-4">
+                        <button class="btn-3d btn-success text-xl px-8" onclick="checkG1('positif')">POSITIF (+)</button>
+                        <button class="btn-3d btn-secondary text-xl px-8" onclick="checkG1('negatif')">NEGATIF (-)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Area Gim 2: Pasangan Kartu -->
+            <div id="game-2" class="hidden card-3d p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <button class="btn-3d btn-primary py-2 px-4" onclick="backToGameMenu()"><i class="fas fa-arrow-left"></i></button>
+                    <h2 class="text-2xl text-orange-700">Pasangan Kartu</h2>
+                    <button class="btn-3d btn-warning py-2 px-4" onclick="initGame2()"><i class="fas fa-redo"></i></button>
+                </div>
+                <div id="g2-grid" class="grid grid-cols-4 gap-2 md:gap-4 max-w-2xl mx-auto mb-4">
+                    <!-- Kartu digenerate via JS -->
+                </div>
+                <p class="text-center text-gray-500 font-bold">Temukan 4 pasang kartu yang tepat!</p>
+            </div>
+
+            <!-- Area Gim 3: Misi Basis 10 -->
+            <div id="game-3" class="hidden card-3d p-6 bg-gradient-to-b from-indigo-900 to-purple-900 border-0 text-white relative overflow-hidden">
+                <div class="flex justify-between items-center mb-6 relative z-10">
+                    <button class="btn-3d btn-primary py-2 px-4" onclick="backToGameMenu()"><i class="fas fa-arrow-left"></i></button>
+                    <h2 class="text-2xl text-yellow-300">Misi Alpha Centauri</h2>
+                    <div class="text-xl font-display text-white">Skor: <span id="g3-score">0</span>/3</div>
+                </div>
+                
+                <div class="text-center py-10 relative z-10">
+                    <div id="g3-rocket" class="text-6xl mb-6 transition-transform duration-1000 transform translateY-0">🚀</div>
+                    <p class="text-lg mb-2 font-semibold">Ubah jarak berikut ke pangkat 10!</p>
+                    <div class="bg-white/20 p-4 rounded-xl inline-block mb-8 backdrop-blur-sm border border-white/30">
+                        <span id="g3-question" class="text-4xl font-display text-white">100.000</span>
+                    </div>
+                    
+                    <div id="g3-options" class="flex flex-wrap justify-center gap-4">
+                        <!-- Options via JS -->
+                    </div>
+                </div>
+                
+                <!-- Bintang Latar Belakang -->
+                <div class="absolute inset-0 z-0 opacity-50 text-white text-xs">
+                    <div class="absolute top-10 left-10">⭐</div>
+                    <div class="absolute top-40 right-20">⭐</div>
+                    <div class="absolute bottom-20 left-1/3">⭐</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 5: KUIS -->
+        <section id="kuis" class="page">
+            <h1 class="text-4xl text-yellow-300 text-center mb-8 drop-shadow-lg"><i class="fas fa-pencil-alt"></i> Kuis Akhir</h1>
+            
+            <div class="card-3d p-6 md:p-10 max-w-3xl mx-auto" id="kuis-container">
+                <!-- Intro Kuis -->
+                <div id="kuis-intro" class="text-center py-8">
+                    <div class="text-7xl mb-6">🏆</div>
+                    <h2 class="text-3xl text-blue-700 mb-4">Siap Menguji Kemampuanmu?</h2>
+                    <p class="text-xl text-gray-600 font-semibold mb-8">Ada 5 pertanyaan pilihan ganda menunggumu. Jawab dengan hati-hati!</p>
+                    <button class="btn-3d btn-primary text-xl" onclick="startKuis()">Mulai Kuis Sekarang!</button>
+                </div>
+
+                <!-- Soal Kuis -->
+                <div id="kuis-soal" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="bg-blue-100 text-blue-800 font-bold px-4 py-2 rounded-full border-2 border-blue-300">Soal <span id="kuis-curr">1</span>/5</span>
+                        <div class="w-1/2 bg-gray-200 rounded-full h-4">
+                            <div id="kuis-progress" class="bg-green-500 h-4 rounded-full transition-all duration-300" style="width: 20%"></div>
+                        </div>
+                    </div>
+                    
+                    <h3 id="q-text" class="text-2xl text-gray-800 font-display mb-8 text-center min-h-[60px]">Pertanyaan...</h3>
+                    
+                    <div id="q-options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Options generated here -->
+                    </div>
+                </div>
+
+                <!-- Hasil Kuis -->
+                <div id="kuis-hasil" class="hidden text-center py-8">
+                    <div id="res-icon" class="text-7xl mb-6">🎉</div>
+                    <h2 class="text-4xl text-blue-700 mb-2">Kuis Selesai!</h2>
+                    <p class="text-xl text-gray-600 font-semibold mb-6">Skor Akhir Kamu:</p>
+                    <div class="inline-block bg-yellow-100 border-4 border-yellow-400 rounded-full w-40 h-40 flex items-center justify-center mb-8 shadow-inner">
+                        <span id="res-score" class="text-5xl font-display text-yellow-600">100</span>
+                    </div>
+                    <p id="res-msg" class="text-2xl font-bold text-green-600 mb-8">Luar Biasa!</p>
+                    <div class="flex justify-center gap-4">
+                        <button class="btn-3d btn-secondary" onclick="document.getElementById('kuis-intro').classList.remove('hidden'); document.getElementById('kuis-hasil').classList.add('hidden');">Ulangi Kuis</button>
+                        <button class="btn-3d btn-primary" onclick="navigate('materi')">Pelajari Lagi</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 6: PROFIL -->
+        <section id="profil" class="page">
+            <h1 class="text-4xl text-yellow-300 text-center mb-8 drop-shadow-lg"><i class="fas fa-id-card"></i> Profil Pengembang</h1>
+            
+            <div class="card-3d max-w-lg mx-auto overflow-hidden">
+                <div class="h-32 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+                <div class="flex justify-center -mt-16 relative">
+                    <!-- Placeholder Avatar Profil -->
+                    <div class="w-32 h-32 rounded-full border-4 border-white bg-blue-100 shadow-lg overflow-hidden flex items-center justify-center">
+                        <img src="https://placehold.co/200x200/ec4899/ffffff?text=MMS" alt="Foto Profil" class="w-full h-full object-cover">
+                    </div>
+                </div>
+                <div class="p-8 text-center">
+                    <h2 class="text-3xl text-gray-800 mb-2">Mira Maya Sari</h2>
+                    <p class="text-xl text-blue-600 font-bold mb-1">Guru Matematika</p>
+                    <p class="text-gray-500 font-semibold mb-6"><i class="fas fa-school mr-2"></i>SMPS 2 Daar El Qolam</p>
+                    
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 text-gray-600">
+                        <p class="italic">"Matematika itu seperti teka-teki alam semesta. Mari buat belajar menjadi menyenangkan dan bermakna!"</p>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-center gap-4 text-2xl">
+                        <a href="#" class="text-gray-400 hover:text-blue-500 transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-pink-500 transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Custom Modal/Message Box (Pengganti Alert) -->
+    <div id="custom-modal" class="fixed inset-0 z-[100] items-center justify-center">
+        <div class="absolute inset-0 bg-black/50" onclick="closeModal()"></div>
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 relative z-10 border-4 shadow-2xl text-center transform scale-100 transition-transform" id="modal-content">
+            <div id="modal-icon" class="text-6xl mb-4">🔔</div>
+            <h3 id="modal-title" class="text-2xl font-display mb-2">Judul</h3>
+            <p id="modal-message" class="text-lg text-gray-600 font-semibold mb-6">Pesan...</p>
+            <button id="modal-btn" class="btn-3d btn-primary w-full" onclick="closeModal()">OK Mengerti!</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        /* ================= SOUND EFFECTS (TONE.JS) ================= */
+        const SoundManager = {
+            initialized: false,
+            synthClick: null,
+            synthNav: null,
+            synthSuccess: null,
+            synthError: null,
+            bgmSynth: null,
+            bgmLoop: null,
+            isBgmPlaying: false,
+
+            async init() {
+                if (this.initialized) return;
+                await Tone.start();
+                
+                // Synth untuk tombol biasa (klik pendek)
+                this.synthClick = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
+                }).toDestination();
+                this.synthClick.volume.value = -12;
+
+                // Synth untuk perpindahan halaman (suara akor/nada gabungan)
+                this.synthNav = new Tone.PolySynth(Tone.Synth, {
+                    envelope: { attack: 0.1, decay: 0.2, sustain: 0.2, release: 1 }
+                }).toDestination();
+                this.synthNav.volume.value = -15;
+
+                // Synth untuk jawaban benar/berhasil
+                this.synthSuccess = new Tone.PolySynth(Tone.Synth).toDestination();
+                this.synthSuccess.volume.value = -10;
+
+                // Synth untuk jawaban salah
+                this.synthError = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.05, decay: 0.2, sustain: 0.2, release: 0.5 }
+                }).toDestination();
+                this.synthError.volume.value = -8;
+
+                // Synth untuk BGM (Musik Latar)
+                this.bgmSynth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "fmsquare", modulationType: "sawtooth", harmonicity: 0.5 },
+                    envelope: { attack: 0.02, decay: 0.1, sustain: 0.2, release: 0.5 }
+                }).toDestination();
+                this.bgmSynth.volume.value = -25; // Volume rendah agar tidak mengganggu suara lain
+
+                // Melodi Gembira & Semangat (Progression: C - F - G - C)
+                const melody = [
+                    "C4", "E4", "G4", "E4", 
+                    "F4", "A4", "C5", "A4", 
+                    "G4", "B4", "D5", "B4", 
+                    "C4", "E4", "G4", "C5"
+                ];
+                
+                this.bgmLoop = new Tone.Sequence((time, note) => {
+                    this.bgmSynth.triggerAttackRelease(note, "8n", time);
+                }, melody, "8n");
+                
+                Tone.Transport.bpm.value = 130; // Tempo Cepat & Semangat
+
+                this.initialized = true;
+            },
+            toggleBGM() {
+                if (!this.initialized) {
+                    this.init().then(() => this.startBGM());
+                    return;
+                }
+                if (this.isBgmPlaying) {
+                    this.stopBGM();
+                } else {
+                    this.startBGM();
+                }
+            },
+            startBGM() {
+                if(!this.initialized) return;
+                Tone.Transport.start();
+                this.bgmLoop.start(0);
+                this.isBgmPlaying = true;
+                const icon = document.getElementById('music-icon');
+                icon.classList.remove('fa-volume-mute', 'text-red-500');
+                icon.classList.add('fa-music', 'text-green-500');
+            },
+            stopBGM() {
+                if(!this.initialized) return;
+                this.bgmLoop.stop();
+                Tone.Transport.pause();
+                this.isBgmPlaying = false;
+                const icon = document.getElementById('music-icon');
+                icon.classList.remove('fa-music', 'text-green-500');
+                icon.classList.add('fa-volume-mute', 'text-red-500');
+            },
+            playClick() {
+                if (!this.initialized) return;
+                this.synthClick.triggerAttackRelease("E5", "32n", Tone.now());
+            },
+            playNav() {
+                if (!this.initialized) return;
+                this.synthNav.triggerAttackRelease(["C4", "E4", "G4"], "8n", Tone.now());
+            },
+            playSuccess() {
+                if (!this.initialized) return;
+                const now = Tone.now();
+                this.synthSuccess.triggerAttackRelease("C5", "8n", now);
+                this.synthSuccess.triggerAttackRelease("E5", "8n", now + 0.1);
+                this.synthSuccess.triggerAttackRelease("G5", "8n", now + 0.2);
+                this.synthSuccess.triggerAttackRelease("C6", "4n", now + 0.3);
+            },
+            playError() {
+                if (!this.initialized) return;
+                const now = Tone.now();
+                this.synthError.triggerAttackRelease("D#3", "8n", now);
+                this.synthError.triggerAttackRelease("C3", "4n", now + 0.15);
+            },
+            playFlip() {
+                if (!this.initialized) return;
+                this.synthClick.triggerAttackRelease("A4", "32n", Tone.now());
+            }
+        };
+
+        // Inisialisasi audio saat pengguna pertama kali berinteraksi (Aturan Browser)
+        document.addEventListener('pointerdown', async (e) => {
+            if (!SoundManager.initialized) {
+                await SoundManager.init();
+                // Putar musik otomatis jika area yang diklik bukan tombol musik itu sendiri
+                if (e.target.closest('#music-btn') === null) {
+                    SoundManager.startBGM();
+                }
+            }
+        }, { once: true });
+
+        /* ================= NAVIGATION & TABS ================= */
+        function navigate(pageId) {
+            SoundManager.playNav();
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            // Scroll to top
+            window.scrollTo(0, 0);
+
+            // Special initializations
+            if(pageId === 'gim') backToGameMenu();
+        }
+
+        function openTab(tabId, btn) {
+            SoundManager.playClick();
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+                tab.classList.remove('animate-fadeIn');
+            });
+            // Reset buttons
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('text-blue-600', 'border-blue-500', 'bg-blue-100');
+                b.classList.add('text-gray-500', 'border-transparent');
+            });
+            // Show selected
+            document.getElementById(tabId).classList.remove('hidden');
+            // Hack to trigger animation
+            setTimeout(() => document.getElementById(tabId).classList.add('animate-fadeIn'), 10);
+            
+            btn.classList.add('text-blue-600', 'border-blue-500', 'bg-blue-100');
+            btn.classList.remove('text-gray-500', 'border-transparent');
+        }
+
+        /* ================= CUSTOM MODAL ================= */
+        function showModal(title, message, type = 'info', callback = null) {
+            const modal = document.getElementById('custom-modal');
+            const mTitle = document.getElementById('modal-title');
+            const mMsg = document.getElementById('modal-message');
+            const mIcon = document.getElementById('modal-icon');
+            const mContent = document.getElementById('modal-content');
+            const mBtn = document.getElementById('modal-btn');
+
+            mTitle.textContent = title;
+            mMsg.innerHTML = message;
+            
+            // Styling based on type
+            mContent.className = 'bg-white rounded-3xl p-8 max-w-sm w-full mx-4 relative z-10 border-4 shadow-2xl text-center';
+            mBtn.className = 'btn-3d w-full ';
+            
+            if(type === 'success') {
+                mContent.classList.add('border-green-400');
+                mTitle.classList.add('text-green-600');
+                mIcon.textContent = '🌟';
+                mBtn.classList.add('btn-success');
+                SoundManager.playSuccess();
+            } else if (type === 'error') {
+                mContent.classList.add('border-red-400');
+                mTitle.classList.add('text-red-600');
+                mIcon.textContent = '💥';
+                mBtn.classList.add('btn-secondary');
+                SoundManager.playError();
+            } else {
+                mContent.classList.add('border-blue-400');
+                mTitle.classList.add('text-blue-600');
+                mIcon.textContent = '💡';
+                mBtn.classList.add('btn-primary');
+                SoundManager.playClick();
+            }
+
+            modal.classList.add('active');
+            
+            // Store callback
+            modal.callback = callback;
+        }
+
+        function closeModal() {
+            SoundManager.playClick();
+            const modal = document.getElementById('custom-modal');
+            modal.classList.remove('active');
+            if (typeof modal.callback === 'function') {
+                modal.callback();
+                modal.callback = null;
+            }
+        }
+
+        /* ================= SIMULASI LOGIC ================= */
+        const baseInput = document.getElementById('sim-base');
+        const expInput = document.getElementById('sim-exp');
+        const simProcess = document.getElementById('sim-process');
+        const simResult = document.getElementById('sim-result');
+
+        function updateSimulation() {
+            const base = parseInt(baseInput.value) || 0;
+            let exp = parseInt(expInput.value) || 0;
+            
+            if (exp < 0) { expInput.value = 0; exp = 0; }
+            if (exp > 10) { expInput.value = 10; exp = 10; } // limit to prevent UI break
+            
+            let processStr = "";
+            let result = 1;
+
+            if (exp === 0) {
+                processStr = "1";
+                result = 1;
+            } else {
+                let parts = [];
+                for(let i=0; i<exp; i++) {
+                    parts.push(base < 0 ? `(${base})` : base);
+                }
+                processStr = parts.join(" &times; ");
+                result = Math.pow(base, exp);
+            }
+
+            simProcess.innerHTML = processStr;
+            simResult.innerHTML = result;
+        }
+
+        baseInput.addEventListener('input', updateSimulation);
+        expInput.addEventListener('input', updateSimulation);
+
+        /* ================= GAMES ================= */
+        function startGame(num) {
+            SoundManager.playClick();
+            document.getElementById('gim-menu').classList.add('hidden');
+            document.getElementById(`game-${num}`).classList.remove('hidden');
+            
+            if(num === 1) initGame1();
+            if(num === 2) initGame2();
+            if(num === 3) initGame3();
+        }
+
+        function backToGameMenu() {
+            SoundManager.playClick();
+            document.getElementById('game-1').classList.add('hidden');
+            document.getElementById('game-2').classList.add('hidden');
+            document.getElementById('game-3').classList.add('hidden');
+            document.getElementById('gim-menu').classList.remove('hidden');
+        }
+
+        // --- GIM 1: Tebak Tanda ---
+        const g1Data = [
+            { q: "(-2)<sup>3</sup>", ans: "negatif" },
+            { q: "(-5)<sup>2</sup>", ans: "positif" },
+            { q: "(-4)<sup>5</sup>", ans: "negatif" },
+            { q: "(-10)<sup>4</sup>", ans: "positif" },
+            { q: "-(6<sup>2</sup>)", ans: "negatif" } // Jebakan
+        ];
+        let g1Current = 0;
+        let g1Score = 0;
+
+        function initGame1() {
+            g1Current = 0;
+            g1Score = 0;
+            document.getElementById('g1-score').innerText = g1Score;
+            loadG1Question();
+        }
+
+        function loadG1Question() {
+            if(g1Current < g1Data.length) {
+                document.getElementById('g1-question').innerHTML = g1Data[g1Current].q;
+            } else {
+                showModal("Gim Selesai!", `Skor Akhir: ${g1Score}/5<br>Hebat!`, "success", backToGameMenu);
+            }
+        }
+
+        function checkG1(ans) {
+            if(ans === g1Data[g1Current].ans) {
+                g1Score++;
+                document.getElementById('g1-score').innerText = g1Score;
+                showModal("Benar!", "Jawabanmu tepat!", "success", () => {
+                    g1Current++;
+                    loadG1Question();
+                });
+            } else {
+                let alasan = g1Data[g1Current].ans === 'positif' ? "Pangkat Genap hasilnya Positif!" : "Pangkat Ganjil (atau ada minus di depan) hasilnya Negatif!";
+                showModal("Ups, Salah!", `Ingat aturannya:<br>${alasan}`, "error", () => {
+                    g1Current++;
+                    loadG1Question();
+                });
+            }
+        }
+
+        // --- GIM 2: Pasangan Kartu ---
+        const g2Pairs = [
+            { id: 1, val: "3<sup>2</sup>" }, { id: 1, val: "9" },
+            { id: 2, val: "(-2)<sup>3</sup>" }, { id: 2, val: "-8" },
+            { id: 3, val: "4<sup>2</sup>" }, { id: 3, val: "16" },
+            { id: 4, val: "10<sup>3</sup>" }, { id: 4, val: "1000" }
+        ];
+        let g2Cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        function initGame2() {
+            SoundManager.playClick();
+            const grid = document.getElementById('g2-grid');
+            grid.innerHTML = '';
+            flippedCards = [];
+            matchedPairs = 0;
+            
+            // Shuffle
+            g2Cards = [...g2Pairs].sort(() => Math.random() - 0.5);
+
+            g2Cards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'memory-card';
+                cardEl.dataset.id = card.id;
+                cardEl.dataset.index = index;
+                
+                cardEl.innerHTML = `
+                    <div class="memory-card-inner">
+                        <div class="memory-card-front">❓</div>
+                        <div class="memory-card-back">${card.val}</div>
+                    </div>
+                `;
+                
+                cardEl.addEventListener('click', flipCard);
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                SoundManager.playFlip();
+                this.classList.add('flipped');
+                flippedCards.push(this);
+
+                if (flippedCards.length === 2) {
+                    setTimeout(checkMatch, 800);
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const match = card1.dataset.id === card2.dataset.id;
+
+            if (match) {
+                // Match
+                card1.style.opacity = '0.5';
+                card2.style.opacity = '0.5';
+                card1.removeEventListener('click', flipCard);
+                card2.removeEventListener('click', flipCard);
+                matchedPairs++;
+                
+                if (matchedPairs === 4) {
+                    setTimeout(() => {
+                        showModal("Luar Biasa!", "Kamu berhasil menemukan semua pasangan!", "success", backToGameMenu);
+                    }, 500);
+                }
+            } else {
+                // No match
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+            }
+            flippedCards = [];
+        }
+
+        // --- GIM 3: Misi Basis 10 ---
+        const g3Data = [
+            { q: "10.000", options: ["10<sup>3</sup>", "10<sup>4</sup>", "10<sup>5</sup>"], ans: 1 },
+            { q: "1.000.000", options: ["10<sup>5</sup>", "10<sup>6</sup>", "10<sup>7</sup>"], ans: 1 },
+            { q: "100.000.000", options: ["10<sup>7</sup>", "10<sup>8</sup>", "10<sup>9</sup>"], ans: 1 }
+        ];
+        let g3Current = 0;
+        let g3Score = 0;
+
+        function initGame3() {
+            g3Current = 0;
+            g3Score = 0;
+            document.getElementById('g3-score').innerText = g3Score;
+            document.getElementById('g3-rocket').style.transform = "translateY(0)";
+            loadG3Question();
+        }
+
+        function loadG3Question() {
+            if(g3Current < g3Data.length) {
+                const data = g3Data[g3Current];
+                document.getElementById('g3-question').innerHTML = data.q;
+                
+                const optsContainer = document.getElementById('g3-options');
+                optsContainer.innerHTML = '';
+                
+                data.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-3d btn-warning text-2xl font-display px-6 py-3 min-w-[120px]';
+                    btn.innerHTML = opt;
+                    btn.onclick = () => checkG3(idx, data.ans);
+                    optsContainer.appendChild(btn);
+                });
+            } else {
+                document.getElementById('g3-rocket').style.transform = "translateY(-500px)"; // Rocket flies away
+                setTimeout(() => {
+                    showModal("Misi Berhasil!", `Roket sampai tujuan!<br>Skor: ${g3Score}/3`, "success", backToGameMenu);
+                }, 1000);
+            }
+        }
+
+        function checkG3(selectedIdx, correctIdx) {
+            if(selectedIdx === correctIdx) {
+                g3Score++;
+                document.getElementById('g3-score').innerText = g3Score;
+                
+                // Animasi roket naik sedikit
+                const rocket = document.getElementById('g3-rocket');
+                const currY = (g3Current + 1) * -30;
+                rocket.style.transform = `translateY(${currY}px)`;
+                
+                showModal("Tepat Sekali!", "Hitung jumlah nolnya! Roket melaju...", "success", () => {
+                    g3Current++;
+                    loadG3Question();
+                });
+            } else {
+                showModal("Waduh Melenceng!", "Ingat: pangkat 10 sama dengan jumlah angka 0-nya.", "error", () => {
+                    g3Current++;
+                    loadG3Question();
+                });
+            }
+        }
+
+        /* ================= KUIS ================= */
+        const kuisData = [
+            {
+                q: "Bentuk perkalian 6 &times; 6 &times; 6 &times; 6 dapat ditulis menjadi perpangkatan...",
+                opts: ["6<sup>4</sup>", "4<sup>6</sup>", "24", "6 &times; 4"],
+                ans: 0
+            },
+            {
+                q: "Berapakah hasil dari 2<sup>5</sup> ?",
+                opts: ["10", "16", "32", "64"],
+                ans: 2
+            },
+            {
+                q: "Berapakah hasil dari (-3)<sup>4</sup> ?",
+                opts: ["-12", "12", "-81", "81"],
+                ans: 3
+            },
+            {
+                q: "Berapakah hasil dari -(7<sup>2</sup>) ?",
+                opts: ["14", "-14", "49", "-49"],
+                ans: 3
+            },
+            {
+                q: "Bentuk pangkat 10 dari 1.000.000 adalah...",
+                opts: ["10<sup>5</sup>", "10<sup>6</sup>", "10<sup>7</sup>", "10<sup>8</sup>"],
+                ans: 1
+            }
+        ];
+        
+        let kuisCurrent = 0;
+        let kuisScore = 0;
+
+        function startKuis() {
+            SoundManager.playClick();
+            document.getElementById('kuis-intro').classList.add('hidden');
+            document.getElementById('kuis-hasil').classList.add('hidden');
+            document.getElementById('kuis-soal').classList.remove('hidden');
+            
+            kuisCurrent = 0;
+            kuisScore = 0;
+            loadKuisSoal();
+        }
+
+        function loadKuisSoal() {
+            const data = kuisData[kuisCurrent];
+            document.getElementById('kuis-curr').innerText = kuisCurrent + 1;
+            document.getElementById('kuis-progress').style.width = `${((kuisCurrent + 1) / 5) * 100}%`;
+            
+            document.getElementById('q-text').innerHTML = data.q;
+            
+            const optsContainer = document.getElementById('q-options');
+            optsContainer.innerHTML = '';
+            
+            // Warna tombol berbeda-beda
+            const colors = ['btn-primary', 'btn-secondary', 'btn-success', 'btn-warning'];
+            
+            data.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `btn-3d ${colors[idx]} text-xl p-4 w-full text-left justify-start`;
+                btn.innerHTML = `<span class="bg-white/20 w-8 h-8 rounded-full inline-flex items-center justify-center mr-3 font-bold">${['A','B','C','D'][idx]}</span> ${opt}`;
+                btn.onclick = () => answerKuis(idx);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function answerKuis(idx) {
+            SoundManager.playClick();
+            if(idx === kuisData[kuisCurrent].ans) {
+                kuisScore += 20; // 20 poin per soal (total 100)
+            }
+            
+            kuisCurrent++;
+            if(kuisCurrent < kuisData.length) {
+                loadKuisSoal();
+            } else {
+                finishKuis();
+            }
+        }
+
+        function finishKuis() {
+            document.getElementById('kuis-soal').classList.add('hidden');
+            document.getElementById('kuis-hasil').classList.remove('hidden');
+            
+            const scoreEl = document.getElementById('res-score');
+            const msgEl = document.getElementById('res-msg');
+            const iconEl = document.getElementById('res-icon');
+            
+            scoreEl.innerText = kuisScore;
+            
+            if(kuisScore === 100) {
+                msgEl.innerText = "Sempurna! Kamu Ahli Matematika!";
+                msgEl.className = "text-2xl font-bold text-green-600 mb-8";
+                iconEl.innerText = "🏆";
+                SoundManager.playSuccess();
+            } else if(kuisScore >= 60) {
+                msgEl.innerText = "Bagus! Terus tingkatkan prestasimu.";
+                msgEl.className = "text-2xl font-bold text-blue-600 mb-8";
+                iconEl.innerText = "👍";
+                SoundManager.playSuccess();
+            } else {
+                msgEl.innerText = "Jangan menyerah, ayo belajar lagi!";
+                msgEl.className = "text-2xl font-bold text-orange-600 mb-8";
+                iconEl.innerText = "💪";
+                SoundManager.playError();
+            }
+        }
+
+    </script>
+</body>
+</html>
